@@ -6,7 +6,7 @@ def nothing(x):
 def show_webcam(mirror=False):
     scale= 50
     cam = cv2.VideoCapture(0)
-    cv2.namedWindow('frame')
+    cv2.namedWindow('frame',cv2.WINDOW_NORMAL)
     cv2.createTrackbar('zoom','frame',1,10,nothing)
     cur_zoom = 1
 
@@ -26,6 +26,12 @@ def show_webcam(mirror=False):
         
         #get the webcam size
         height, width, channels = image.shape
+
+        #resize the image 
+        height = height*2
+        width = width*2
+        image = cv2.resize(image,(width,height))
+
         #prepare the crop
         centerX,centerY=int(height/2),int(width/2)
         radiusX,radiusY= int(scale*height/100),int(scale*width/100)
