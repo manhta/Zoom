@@ -26,8 +26,6 @@ def show_webcam(mirror=False):
         
         #get the webcam size
         height, width, channels = image.shape
-        height = int(height*1.5)
-        width = int(width*1.5)
         #prepare the crop
         centerX,centerY=int(height/2),int(width/2)
         radiusX,radiusY= int(scale*height/100),int(scale*width/100)
@@ -40,8 +38,7 @@ def show_webcam(mirror=False):
         cv2.imshow('frame', resized_cropped)
 
         if cv2.waitKey(1) == ord('q'):
-            break  # esc to qui
-        #add + or - 5 % to zoo
+            break  
     cv2.destroyAllWindows()
     
 def main():
