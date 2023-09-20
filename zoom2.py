@@ -4,7 +4,7 @@ def nothing(x):
     pass
 
 def show_webcam(mirror=False):
-    scale= 50
+    scale = 2520
     cam = cv2.VideoCapture(0)
     cv2.namedWindow('frame',cv2.WINDOW_NORMAL)
     cv2.createTrackbar('zoom','frame',1,10,nothing)
@@ -19,9 +19,9 @@ def show_webcam(mirror=False):
 
         if cur_zoom!=zoom:
             if zoom==0: 
-                scale = 50
+                scale = 2520
             else:
-                scale = int(round(50/zoom))
+                scale = int(round(2520/zoom))
                 cur_zoom=zoom
         
         #get the webcam size
@@ -34,12 +34,12 @@ def show_webcam(mirror=False):
 
         #prepare the crop
         centerX,centerY=int(height/2),int(width/2)
-        radiusX,radiusY= int(scale*height/100),int(scale*width/100)
+        radiusX,radiusY= int(scale*height/(2520*2)),int(scale*width/(2520*2))
         minX,maxX=centerX-radiusX,centerX+radiusX
         minY,maxY=centerY-radiusY,centerY+radiusY
-        cropped = image[minX:maxX, minY:maxY]
-        resized_cropped = cv2.resize(cropped, (width, height))
-        cv2.putText(resized_cropped,str(scale),(50,50),cv2.FONT_HERSHEY_COMPLEX,1.5,(0,0,255),1)
+        cropped = image[minY:maxY, minX:maxX]
+        resized_cropped = cv2.resize(cropped, (width, height),interpolation=cv2.INTER_NEAREST)
+        # cv2.putText(resized_cropped,str(scale),(50,50),cv2.FONT_HERSHEY_COMPLEX,1.5,(0,0,255),1)
 
         cv2.imshow('frame', resized_cropped)
 
