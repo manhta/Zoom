@@ -3,7 +3,7 @@ import cv2 as cv
 evt = 0
 root = True
 MousePnt = []
-Start = False 
+StartZoom = False 
 StartPntArr = []
 StartPnt = []
 EndPnt = []
@@ -46,10 +46,10 @@ while True:
             if len(StartPntArr)>0:
                 StartPntArr.clear()
             StartPntArr.append(MousePnt)
-            Start = True
+            StartZoom = True
 
         if evt==2:
-            if Start == True:
+            if StartZoom == True:
                 EndPnt.append(MousePnt)
                 StartPnt.append(StartPntArr[0])
                 Start = False
