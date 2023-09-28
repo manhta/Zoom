@@ -68,19 +68,20 @@ def MouseROI(roi,evt):
             StartPnt.append(StartPntArr[0])
             StartPntArr.clear()
             StartZoom = False
-        if len(EndPnt) < 2:
-            rw = EndPnt[0][0] - StartPnt[0][0]
-            rh = EndPnt[0][1] - StartPnt[0][1]  
-        else:
-            X = StartPnt[0][0]
-            Y = StartPnt[0][1]
-            StartPnt[0][0] = X + int(StartPnt[1][0]*(rw/w))
-            StartPnt[0][1] = Y + int(StartPnt[1][1]*(rh/h))
-            EndPnt[0][0] = X + int(EndPnt[1][0]*(rw/w))
-            EndPnt[0][1] = Y + int(EndPnt[1][1]*(rh/h))
-            
-            StartPnt.pop(1)
-            EndPnt.pop(1)
+        if len(StartPnt)>0 and len(EndPnt)>0:
+            if len(EndPnt) < 2:
+                rw = EndPnt[0][0] - StartPnt[0][0]
+                rh = EndPnt[0][1] - StartPnt[0][1]  
+            else:
+                X = StartPnt[0][0]
+                Y = StartPnt[0][1]
+                StartPnt[0][0] = X + int(StartPnt[1][0]*(rw/w))
+                StartPnt[0][1] = Y + int(StartPnt[1][1]*(rh/h))
+                EndPnt[0][0] = X + int(EndPnt[1][0]*(rw/w))
+                EndPnt[0][1] = Y + int(EndPnt[1][1]*(rh/h))
+                
+                StartPnt.pop(1)
+                EndPnt.pop(1)
 
     if len(StartPnt)>0 and len(EndPnt)>0:
         if StartPnt[0][0] > EndPnt[0][0]:
@@ -94,7 +95,7 @@ def MouseROI(roi,evt):
 
         roi = roi[StartPnt[0][1]:EndPnt[0][1],StartPnt[0][0]:EndPnt[0][0]]
 
-    roi = cv.resize(roi,(w,h))
+    roi = cv.resize(roi,(w,h),interpolation=cv.INTER_LANCZOS4)
 
     return roi
 
@@ -107,7 +108,6 @@ def main():
     cv.namedWindow('zoom')
     # cv.setWindowProperty('zoom',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)
     cv.createTrackbar('bar1','zoom',1,10,nothing)
-    # cv.setMouseCallback('zoom',MouseCallback)
 
     while True:
         ret, frame = cam.read()
@@ -135,6 +135,11 @@ def main():
         if cv.waitKey(20) == ord('b'):
             cv.setMouseCallback('zoom',lambda *args : None)
             Mouse = False
+            rw = 0
+            rh = 0
+            StartZoom = False
+            StartPntArr.clear()
+            MousePnt.clear()
             StartPnt.clear()
             EndPnt.clear()
             roi = []
