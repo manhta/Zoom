@@ -52,7 +52,7 @@ def MouseROI(roi,evt):
     global StartPntArr,StartPnt,EndPnt
 
     h,w = roi.shape[0:2]
-    
+
     if evt == 1:
             StartPntArr.append(MousePnt)
             StartZoom = True
@@ -122,6 +122,7 @@ def MoveROI(roi,frame,new_zoom):
 
     if len(StartPnt)==0:
         if len(MoveStartPnt)==0:
+            print(cur_zoom)
             MoveStartPnt = [(int(w/2)-int(w/(2*cur_zoom))),(int(h/2)-int(h/(2*cur_zoom)))]
             MoveEndPnt = [(int(w/2)+int(w/(2*cur_zoom))),(int(h/2)+int(h/(2*cur_zoom)))]
         else:
@@ -130,14 +131,16 @@ def MoveROI(roi,frame,new_zoom):
                 MoveStartPnt = [(int(w/2)-int(w/(2*cur_zoom))),(int(h/2)-int(h/(2*cur_zoom)))]
                 MoveEndPnt = [(int(w/2)+int(w/(2*cur_zoom))),(int(h/2)+int(h/(2*cur_zoom)))]
     else:
-        if cur_zoom==1:
-            MoveStartPnt = StartPnt[0]
-            MoveEndPnt = EndPnt[0]
+        CenterPnt = [int((EndPnt[0][0]+StartPnt[0][0])/2),int((EndPnt[0][1]+StartPnt[0][1])/2)]
+        if len(MoveEndPnt)==0 and len(MoveStartPnt)==0:
+            MoveStartPnt = [CenterPnt[0]-int(((EndPnt[0][0]-StartPnt[0][0])/(2*new_zoom))),CenterPnt[1]-int(((EndPnt[0][1]-StartPnt[0][1])/(2*new_zoom)))]
+            MoveEndPnt = [CenterPnt[0]+int(((EndPnt[0][0]-StartPnt[0][0])/(2*new_zoom))),CenterPnt[1]+int(((EndPnt[0][1]-StartPnt[0][1])/(2*new_zoom)))]
         else:
-            CenterPnt = [int((EndPnt[0][0]-StartPnt[0][0])/2),int((EndPnt[0][1]-StartPnt[0][1])/2)]
-            MoveStartPnt = [CenterPnt[0]-int((EndPnt[0][0]-StartPnt[0][0]/(2*cur_zoom))),CenterPnt[1]-int((EndPnt[0][1]-StartPnt[0][1]/(2*cur_zoom)))]
-            MoveEndPnt = [CenterPnt[0]+int((EndPnt[0][0]-StartPnt[0][0]/(2*cur_zoom))),CenterPnt[1]+int((EndPnt[0][1]-StartPnt[0][1]/(2*cur_zoom)))]
-    
+            if cur_zoom!=new_zoom:
+                cur_zoom = new_zoom
+                MoveStartPnt = [CenterPnt[0]-int(((EndPnt[0][0]-StartPnt[0][0])/(2*new_zoom))),CenterPnt[1]-int(((EndPnt[0][1]-StartPnt[0][1])/(2*new_zoom)))]
+                MoveEndPnt = [CenterPnt[0]+int(((EndPnt[0][0]-StartPnt[0][0])/(2*new_zoom))),CenterPnt[1]+int(((EndPnt[0][1]-StartPnt[0][1])/(2*new_zoom)))]
+
     if evt == 1:
         RootPnt = MousePnt
         Move = True
@@ -166,10 +169,11 @@ def MoveROI(roi,frame,new_zoom):
                     MoveEndPnt[1] = MoveEndPnt[1]+y_dif
 
             RootPnt = MousePnt
-
     if len(StartPnt)>0 and len(EndPnt)>0:
         StartPnt[0] = MoveStartPnt
         EndPnt[0] = MoveEndPnt
+        rw = EndPnt[0][0] - StartPnt[0][0]
+        rh = EndPnt[0][1] - StartPnt[0][1]
     if len(MoveStartPnt)>0 and len(MoveEndPnt)>0:
         roi = frame[MoveStartPnt[1]:MoveEndPnt[1],MoveStartPnt[0]:MoveEndPnt[0]]
     roi = cv.resize(roi,(w,h),interpolation=cv.INTER_LANCZOS4)
@@ -177,13 +181,13 @@ def MoveROI(roi,frame,new_zoom):
 
 # C: MAIN
 def main():
-    global evt
+    global evt,rh,rw
     global LeftMouse,RightMouse,Move
     global StartPntArr,StartPnt,EndPnt,roi,MoveStartPnt,MoveEndPnt
 
     cam = cv.VideoCapture(0)
     cv.namedWindow('zoom')
-    # cv.setWindowProperty('zoom',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)
+    cv.setWindowProperty('zoom',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)
     cv.createTrackbar('bar1','zoom',1,10,nothing)
     cv.setMouseCallback('zoom',RightMouseCallback)
 
@@ -202,12 +206,22 @@ def main():
             zoom = 1
 
         if LeftMouse:
+            print('Left')
+            if len(MoveStartPnt)>0 and len(StartPnt)==0:
+                StartPnt.append(MoveStartPnt)
+                EndPnt.append(MoveEndPnt)
+                rh = EndPnt[0][1]-StartPnt[0][1]
+                rw = EndPnt[0][0]-StartPnt[0][0]
+                cv.setTrackbarPos('bar1','zoom',1)
             roi = MouseROI(roi,evt)
 
         if RightMouse:
+            print('Right')
             roi = MoveROI(roi,frame,zoom)
-    
-        roi = TrackBarROI(roi,zoom)
+
+        if RightMouse==False:
+            roi = TrackBarROI(roi,zoom)
+
         cv.imshow('zoom',roi)
 
         if cv.waitKey(20) == ord('z'):
@@ -220,6 +234,8 @@ def main():
             RightMouse = True
             LeftMouse = False
             evt = 0
+        if cv.waitKey(20) == ord('s'):
+            cv.setMouseCallback('zoom',lambda *args: None)
         if cv.waitKey(20) == ord('b'):
             cv.setMouseCallback('zoom',lambda *args: None)
             LeftMouse = False
@@ -234,6 +250,7 @@ def main():
             StartPnt.clear()
             EndPnt.clear()
             roi = []
+
         if cv.waitKey(20) == ord('q'):
             break
 
