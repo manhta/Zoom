@@ -52,7 +52,6 @@ def MouseROI(roi,evt):
     global StartPntArr,StartPnt,EndPnt
 
     h,w = roi.shape[0:2]
-
     if evt == 1:
             StartPntArr.append(MousePnt)
             StartZoom = True
@@ -174,6 +173,7 @@ def MoveROI(roi,frame,new_zoom):
         EndPnt[0] = MoveEndPnt
         rw = EndPnt[0][0] - StartPnt[0][0]
         rh = EndPnt[0][1] - StartPnt[0][1]
+    print(MoveStartPnt,MoveEndPnt)
     if len(MoveStartPnt)>0 and len(MoveEndPnt)>0:
         roi = frame[MoveStartPnt[1]:MoveEndPnt[1],MoveStartPnt[0]:MoveEndPnt[0]]
     roi = cv.resize(roi,(w,h),interpolation=cv.INTER_LANCZOS4)
@@ -187,7 +187,7 @@ def main():
 
     cam = cv.VideoCapture(0)
     cv.namedWindow('zoom')
-    cv.setWindowProperty('zoom',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)
+    # cv.setWindowProperty('zoom',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)
     cv.createTrackbar('bar1','zoom',1,10,nothing)
     cv.setMouseCallback('zoom',RightMouseCallback)
 
@@ -206,7 +206,6 @@ def main():
             zoom = 1
 
         if LeftMouse:
-            print('Left')
             if len(MoveStartPnt)>0 and len(StartPnt)==0:
                 StartPnt.append(MoveStartPnt)
                 EndPnt.append(MoveEndPnt)
@@ -216,7 +215,6 @@ def main():
             roi = MouseROI(roi,evt)
 
         if RightMouse:
-            print('Right')
             roi = MoveROI(roi,frame,zoom)
 
         if RightMouse==False:
@@ -236,6 +234,8 @@ def main():
             evt = 0
         if cv.waitKey(20) == ord('s'):
             cv.setMouseCallback('zoom',lambda *args: None)
+            LeftMouse = True
+            RightMouse = False
         if cv.waitKey(20) == ord('b'):
             cv.setMouseCallback('zoom',lambda *args: None)
             LeftMouse = False
