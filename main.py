@@ -1,4 +1,5 @@
 import cv2 as cv
+from cv2 import dnn_superres
 
 # A: ZOOM
 ScaleMax = 2520
@@ -12,6 +13,14 @@ EndPnt = []
 rw = 0
 rh = 0
 roi = []
+
+# EDSR 
+edsr = dnn_superres.DnnSuperResImpl.create()
+edsr.readModel('EDSR_x4.pb')
+edsr.setModel('edsr',4)
+def EDSR(roi):
+    roi = edsr.upsample(roi)
+    return roi
 
 # Trackbar
 def nothing(x):
@@ -173,7 +182,6 @@ def MoveROI(roi,frame,new_zoom):
         EndPnt[0] = MoveEndPnt
         rw = EndPnt[0][0] - StartPnt[0][0]
         rh = EndPnt[0][1] - StartPnt[0][1]
-    print(MoveStartPnt,MoveEndPnt)
     if len(MoveStartPnt)>0 and len(MoveEndPnt)>0:
         roi = frame[MoveStartPnt[1]:MoveEndPnt[1],MoveStartPnt[0]:MoveEndPnt[0]]
     roi = cv.resize(roi,(w,h),interpolation=cv.INTER_LANCZOS4)
@@ -219,6 +227,9 @@ def main():
 
         if RightMouse==False:
             roi = TrackBarROI(roi,zoom)
+
+        if len(StartPnt)>0:
+            roi = EDSR(roi)
 
         cv.imshow('zoom',roi)
 
