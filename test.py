@@ -39,7 +39,8 @@ def TrackBarROI(roi,zoom):
     EndPnt_ROI = [int(CenterPnt_ROI[0]+RadiusX),int(CenterPnt_ROI[1]+RadiusY)]
 
     ROI = roi[StartPnt_ROI[1]:EndPnt_ROI[1],StartPnt_ROI[0]:EndPnt_ROI[0]]
-    ROI = cv.resize(ROI,(width,height))
+    if zoom<4:
+        ROI = cv.resize(ROI,(width,height))
 
     return ROI
 
@@ -231,7 +232,7 @@ def main():
         # if len(StartPnt)>0 and len(EndPnt)>0:
         #     roi = FSRCNN(roi)
 
-        if zoom>4:
+        if len(StartPnt)>0 and len(EndPnt)>0:
             roi = FSRCNN(roi)
 
         cv.imshow('zoom',roi)
